@@ -12,6 +12,10 @@ type RequestLine struct {
 	Method        string
 }
 
+func (r *RequestLine) ValidHTTP() bool {
+	return r.HttpVersion == "HTTP/1.1"
+}
+
 type Request struct {
 	RequestLine RequestLine
 }
@@ -33,7 +37,7 @@ func parseRequestLine(b string) (*RequestLine, string, error) {
 	if len(parts) != 3 {
 		return nil, restOfMessage, domain.MALFORMED_REQUEST_LINE
 	}
-	return &RequestLine{
+	rl := RequestLine{
 		Method:        parts[0],
 		RequestTarget: parts[1],
 		HttpVersion:   parts[2],
