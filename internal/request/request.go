@@ -1,7 +1,7 @@
 package request
 
 import (
-	"fmt"
+	"fugu-http/internal/domain"
 	"io"
 	"strings"
 )
@@ -20,13 +20,25 @@ const (
 	SEPARATOR = "\n\r"
 )
 
-var BAD_START_LINE = fmt.Errorf("bad start line")
-
 func parseRequestLine(b string) (*RequestLine, string, error) {
 	idx := strings.Index(b, SEPARATOR)
 	if idx == -1 {
 		return nil, b, nil
 	}
+
+	startLine := b[:idx]
+	restOfMessage := b[idx+len(SEPARATOR):]
+
+	parts := strings.Split(startLine, " ")
+	if len(parts) != 3 {
+		return nil, restOfMessage, domain.MALFORMED_REQUEST_LINE
+	}
+	return &RequestLine{
+		Method:        parts[0],
+		RequestTarget: parts[1],
+		HttpVersion:   parts[2],
+	}, restOfMessage, nil
+
 }
 
 func RequestFromReader(reader io.Reader) (*Request, error) {
